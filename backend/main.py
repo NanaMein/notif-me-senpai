@@ -1,12 +1,11 @@
 from fastapi import FastAPI, status
+from routers.v1 import router
+from backend.core.env_file import settings
 
 
 app = FastAPI()
+app.include_router(router)
 
-
-@app.get("/", status_code=status.HTTP_200_OK)
-def read_root():
-    return {"Hello": "World"}
 
 
 if __name__ == "__main__":
@@ -14,7 +13,7 @@ if __name__ == "__main__":
 
     print("RUNNING UVICORN")
     uvicorn.run(
-        "main:app",
+        "backend.main:app",
         host="0.0.0.0",
         port=8000,
         reload=True
