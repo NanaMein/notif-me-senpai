@@ -1,11 +1,9 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException
 from routers.v1 import router
-from backend.core.env_file import settings
 
 
 app = FastAPI()
 app.include_router(router)
-
 
 
 if __name__ == "__main__":
@@ -18,3 +16,4 @@ if __name__ == "__main__":
         port=8000,
         reload=True
     )
+
