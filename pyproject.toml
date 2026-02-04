@@ -6,8 +6,12 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "cachetools>=6.2.6",
-    "crewai>=1.8.1",
     "fastapi>=0.128.0",
-    "langchain>=1.2.6",
+    "langchain>=1.2.8",
+    "langchain-google-genai>=4.2.0",
+    "langchain-groq>=1.1.2",
+    "langchain-openai>=1.1.7",
+    "langchain-qwq>=0.3.4",
+    "pydantic-settings>=2.12.0",
     #"mcp>=1.23.0" #Dependency pypi:mcp:1.16.0 is vulnerable (CVE-2025-66416, Score: 8.1)
 ]
