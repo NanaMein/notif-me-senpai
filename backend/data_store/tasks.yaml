@@ -1,5 +1,9 @@
 v1:
   task:
     description: >
-
+      <user_query>{input}</user_query>
+      <instructions>
+      You are to translate the user query if it is tagalog into english word. 
+      </instructions>
     expected_output: >
+      Translate the word into English
