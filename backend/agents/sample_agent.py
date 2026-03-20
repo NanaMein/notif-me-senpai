@@ -1,4 +1,5 @@
 from crewai import *
+from fastapi.concurrency import run_in_threadpool
 from abc import ABC, abstractmethod
 from backend.data_store.prompt_loader import PromptLoader, AgentPrompts, TaskPrompts
 from backend.agents.groq_llm import GroqLLM
@@ -37,3 +38,15 @@ def crew():
 c = crew()
 ck = c.kickoff(inputs={"input":"Uy kamusta ka na beh? nakaka loka na dito sa boracay, ang hohot ng mga guys here. "})
 print(ck)
+
+def _internal_kickoff(input_data: dict[str, str]):
+    _kickoff = crew().kickoff(inputs=input_data)
+    return _kickoff
+
+async def agent_task_runner(message: str):
+    try:
+        input_message = {"message":message}
+        result = await run_in_threadpool(_internal_kickoff, input_message)
+        return result
+    except Exception as e:
+        return None
