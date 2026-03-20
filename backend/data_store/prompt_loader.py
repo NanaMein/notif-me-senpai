@@ -13,7 +13,7 @@ except ImportError:
 
 class LoaderABC(ABC):
     def __init__(self, file_path: Union[str, None] = None) -> None:
-        self._file_path = file_path
+        self.file_path = file_path
 
     @abstractmethod
     def _load_resources(self) -> Dict[str, Any]:
@@ -29,12 +29,6 @@ class PromptLoader(LoaderABC):
         super().__init__(file_path)
         self._base_dir = Path(__file__).parent
         self.data = self._load_resources()
-
-    @property
-    def file_path(self):
-        if self._file_path is None:
-            return "agents.yaml"
-        return self._file_path
 
 
     def _load_resources(self) -> Dict[str, Any]:
