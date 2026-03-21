@@ -35,9 +35,7 @@ def crew():
         process=Process.sequential
     )
 
-c = crew()
-ck = c.kickoff(inputs={"input":"Uy kamusta ka na beh? nakaka loka na dito sa boracay, ang hohot ng mga guys here. "})
-print(ck)
+
 
 def _internal_kickoff(input_data: dict[str, str]):
     _kickoff = crew().kickoff(inputs=input_data)
