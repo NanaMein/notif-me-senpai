@@ -1,51 +1,51 @@
 from typing import Any
-from azure.identity import DefaultAzureCredential
-from azure.ai.projects import AIProjectClient
+from azure.identity.aio import DefaultAzureCredential
+from azure.ai.projects.aio import AIProjectClient
 from backend.agents.azure.azure_configs import azure_settings
-from functools import lru_cache
-from starlette.concurrency import run_in_threadpool
-from datetime import datetime, timezone
 
 
-@lru_cache(maxsize=1)
-def azure_client(place_holder_id: str | None = None):
-    endpoint = azure_settings.existing_aiproject_endpoint
-    return AIProjectClient(
-        endpoint=endpoint.get_secret_value(),
-        credential=DefaultAzureCredential(),
-    )
+class AzureAgentService:
+    def __init__(self, agent_reference: dict[str, Any] | None = None):
+        self._credential: None | DefaultAzureCredential = None
+        self._client: None | AIProjectClient = None
+        self._agent_reference = agent_reference
 
-
-class AzureChatCompletionBase:
-    def __init__(
-            self,
-            client: AIProjectClient,
-            message: str | list[dict[str, str]],
-    ):
-        self._client = client
-        self._message = message
 
     @property
-    def message(self):
-        return self.message_handler(self._message)
+    def extra_body(self) -> dict[str, Any]:
+        if self._agent_reference is None:
+            agents = azure_settings.agents
+            self._agent_reference = {"agent_reference": {"name": agents["name"] , "version": agents["version"], "type": "agent_reference"}}
+        return self._agent_reference
 
-    @property
-    def client(self):
+    async def credential(self):
+        if self._credential is None:
+            self._credential = DefaultAzureCredential()
+        return self._credential
+
+
+    async def client(self):
+        if self._client is None:
+            credential = await self.credential()
+            self._client = AIProjectClient(
+                endpoint=azure_settings.existing_aiproject_endpoint.get_secret_value(),
+                credential=credential
+            )
         return self._client
 
-    @staticmethod
-    def message_handler(input_message: Any) -> list[dict[str, str]]:
-        if isinstance(input_message, str):
-            messages = [{"role": "user", "content": input_message}]
-        elif isinstance(input_message, list):
-            messages = input_message
-        else:
-            messages = [{"role": "user", "content": str(input_message)}]
-        return messages
+    async def agent_run(self, inputs: str | list[dict[str, str]]):
+        client = await self.client()
+        async with client.get_openai_client() as openai_client:
+            if isinstance(inputs, str):
+                input_list = [{"role": "user", "content": inputs}]
+            else:
+                input_list = inputs
 
-    async def execute(self):
-        response = await run_in_threadpool(azure_query_engine, self.message, self.client)
-        return response
+            response = await openai_client.responses.create(
+                input=input_list,
+                extra_body=self.extra_body,
+            )
+            return response.output_text
 
 
 
