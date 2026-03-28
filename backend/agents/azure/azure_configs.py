@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import SecretStr, Field
+from pydantic import SecretStr
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
@@ -7,15 +7,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 
 class _AzureSettings(BaseSettings):
-    AZURE_EXISTING_AGENT_ID: str
-    AZURE_ENV_NAME: SecretStr
-    AZURE_LOCATION: SecretStr
-    AZURE_SUBSCRIPTION_ID: SecretStr
     AZURE_EXISTING_AIPROJECT_ENDPOINT: SecretStr
-    AZURE_EXISTING_AIPROJECT_RESOURCE_ID: SecretStr
-    AZURE_EXISTING_RESOURCE_ID: str
-    AZURE_OPENAI_ENDPOINT: SecretStr
-    AZURE_API_KEY: SecretStr
+    AGENT_NAME_1: str
+    AGENT_VERSION_1: str
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env.azure",
@@ -26,16 +20,20 @@ class _AzureSettings(BaseSettings):
 
 class Settings:
     _azure = _AzureSettings()
-    existing_agent_id = _azure.AZURE_EXISTING_AGENT_ID
-    env_name=_azure.AZURE_ENV_NAME
-    location = _azure.AZURE_LOCATION
-    subscription_id = _azure.AZURE_SUBSCRIPTION_ID
     existing_aiproject_endpoint = _azure.AZURE_EXISTING_AIPROJECT_ENDPOINT
-    existing_aiproject_resource_id=_azure.AZURE_EXISTING_AIPROJECT_RESOURCE_ID
-    existing_resource_id = _azure.AZURE_EXISTING_RESOURCE_ID
-    openai_endpoint = _azure.AZURE_OPENAI_ENDPOINT
-    api_key = _azure.AZURE_API_KEY
+
+    @property
+    def agent_reference(self) -> tuple[str, str]:
+        _name = self._azure.AGENT_NAME_1
+        _version = self._azure.AGENT_VERSION_1
+        return _name, _version
+
+    @property
+    def agents(self):
+        return {
+            "name":self._azure.AGENT_NAME_1,
+            "version":self._azure.AGENT_VERSION_1,
+        }
 
 azure_settings = Settings()
-
 
